@@ -22,7 +22,7 @@
 
 class BLERemoteService;
 class BLERemoteDescriptor;
-typedef std::function<void(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* pData, size_t length, bool isNotify)> notify_callback;
+typedef std::function<void(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* pData, size_t length, bool isNotify, void* param)> notify_callback;
 /**
  * @brief A model of a remote %BLE characteristic.
  */
@@ -47,7 +47,7 @@ public:
 	uint16_t    readUInt16();
 	uint32_t    readUInt32();
 	float       readFloat();
-	void        registerForNotify(notify_callback _callback, bool notifications = true, bool descriptorRequiresRegistration = true);
+	void        registerForNotify(notify_callback _callback, bool notifications = true, bool descriptorRequiresRegistration = true, void* param = nullptr);
 	void        writeValue(uint8_t* data, size_t length, bool response = false);
 	void        writeValue(std::string newValue, bool response = false);
 	void        writeValue(uint8_t newValue, bool response = false);
@@ -79,6 +79,7 @@ private:
 	std::string          m_value;
 	uint8_t 			 *m_rawData;
 	notify_callback		 m_notifyCallback;
+	void*				 m_notifyCallbackParam;
 
 	// We maintain a map of descriptors owned by this characteristic keyed by a string representation of the UUID.
 	std::map<std::string, BLERemoteDescriptor*> m_descriptorMap;

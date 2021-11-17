@@ -39,6 +39,7 @@ BLERemoteCharacteristic::BLERemoteCharacteristic(
 	m_charProp       = charProp;
 	m_pRemoteService = pRemoteService;
 	m_notifyCallback = nullptr;
+	m_notifyCallbackParam = nullptr;
 	m_rawData = nullptr;
     m_auth           = ESP_GATT_AUTH_REQ_NONE;
 
@@ -163,7 +164,7 @@ void BLERemoteCharacteristic::gattClientEventHandler(esp_gattc_cb_event_t event,
 			if (evtParam->notify.handle != getHandle()) break;
 			if (m_notifyCallback != nullptr) {
 				log_d("Invoking callback for notification on characteristic %s", toString().c_str());
-				m_notifyCallback(this, evtParam->notify.value, evtParam->notify.value_len, evtParam->notify.is_notify);
+				m_notifyCallback(this, evtParam->notify.value, evtParam->notify.value_len, evtParam->notify.is_notify, m_notifyCallbackParam);
 			} // End we have a callback function ...
 			break;
 		} // ESP_GATTC_NOTIFY_EVT
@@ -458,10 +459,11 @@ std::string BLERemoteCharacteristic::readValue() {
  * unregistering a notification.
  * @return N/A.
  */
-void BLERemoteCharacteristic::registerForNotify(notify_callback notifyCallback, bool notifications, bool descriptorRequiresRegistration) {
+void BLERemoteCharacteristic::registerForNotify(notify_callback notifyCallback, bool notifications, bool descriptorRequiresRegistration, void* param) {
 	log_v(">> registerForNotify(): %s", toString().c_str());
 
 	m_notifyCallback = notifyCallback;   // Save the notification callback.
+	m_notifyCallbackParam = param;
 
 	m_semaphoreRegForNotifyEvt.take("registerForNotify");
 
